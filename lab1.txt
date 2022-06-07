@@ -1,0 +1,62 @@
+cqlsh> create keyspace employees  with replication={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> use employees;
+cqlsh:employees> create table employee_info( emp_id int, emp_name text, designation text, date_of_joining timestamp, salary double, dept_name text,PRIMARY KEY(emp_id));
+cqlsh:employees> BEGIN BATCH
+             ... INSERT INTO 
+             ... employee_info(emp_id,emp_name,designation,date_of_joining,salary,dept_name)
+             ... values(124,'Pranav','Manager','2000-09-24',750000,'Export')
+             ... employee_info(emp_id,emp_name,designation,date_of_joining,salary,dept_name)
+             ... values(125,'Anurag','AsstManager','2000-01-04',550000,'Export')
+             ... employee_info(emp_id,emp_name,designation,date_of_joining,salary,dept_name)
+             ... values(126,'Prateek','HR','2000-05-04',650000,'HR')
+             ... APPLY BATCH;
+
+cqlsh:employees> SELECT* FROM employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name  | salary
+--------+---------------------------------+-----------+-------------+-----------+---------
+    125 | 2000-01-03 18:30:00.000000+0000 |    Export | AsstManager |    Anurag | 5.5e+05
+    126 | 2000-05-03 18:30:00.000000+0000 |        HR |          HR |    Prateek | 6.5e+05
+    124 | 2000-09-23 18:30:00.000000+0000 |    Export |     Manager | Pranav | 7.5e+05
+
+cqlsh:employees> update employee_info set emp_name='Saurab' where emp_id=125;
+cqlsh:employees> SELECT* FROM employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name  | salary
+--------+---------------------------------+-----------+-------------+-----------+---------
+    125 | 2000-01-03 18:30:00.000000+0000 |    Export | AsstManager |    Saurab | 5.5e+05
+    126 | 2000-05-03 18:30:00.000000+0000 |        HR |          HR |    Prateek | 6.5e+05
+    124 | 2000-09-23 18:30:00.000000+0000 |    Export |     Manager | Pranav | 7.5e+05
+
+(3 rows)
+cqlsh:employees> update employee_info set dept_name='import' where emp_id=125;
+cqlsh:employees> SELECT* FROM employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name  | salary
+--------+---------------------------------+-----------+-------------+-----------+---------
+    125 | 2000-01-03 18:30:00.000000+0000 |    import | AsstManager |    Saurab | 5.5e+05
+    126 | 2000-05-03 18:30:00.000000+0000 |        HR |          HR |    Prateek | 6.5e+05
+    124 | 2000-09-23 18:30:00.000000+0000 |    Export |     Manager | Pranav | 7.5e+05
+
+(3 rows)
+cqlsh:employees> ALTER TABLE employee_info add project set<text>;
+cqlsh:employees> SELECT* FROM employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name  | project | salary
+--------+---------------------------------+-----------+-------------+-----------+---------+---------
+    125 | 2000-01-03 18:30:00.000000+0000 |    import | AsstManager |    Saurab |    null | 5.5e+05
+    126 | 2000-05-03 18:30:00.000000+0000 |        HR |          HR |    Prateek |    null | 6.5e+05
+    124 | 2000-09-23 18:30:00.000000+0000 |    Export |     Manager | Pranav |    null | 7.5e+05
+
+cqlsh:employees> update employee_info set project={'pro4555','pro2566'} where emp_id=126;
+cqlsh:employees> update employee_info set project={'pro45','pro25'} where emp_id=124;
+cqlsh:employees> update employee_info set project={'pro1','pro2'} where emp_id=125;
+cqlsh:employees> SELECT* FROM employee_info;
+
+ emp_id | date_of_joining                 | dept_name | designation | emp_name  | project                | salary
+--------+---------------------------------+-----------+-------------+-----------+------------------------+---------
+    125 | 2000-01-03 18:30:00.000000+0000 |    import | AsstManager |    Saurab |       {'pro1', 'pro2'} | 5.5e+05
+    126 | 2000-05-03 18:30:00.000000+0000 |        HR |          HR |    Prateek | {'pro2566', 'pro4555'} | 6.5e+05
+    124 | 2000-09-23 18:30:00.000000+0000 |    Export |     Manager | Pranav |     {'pro25', 'pro45'} | 7.5e+05
+
+(3 rows)
